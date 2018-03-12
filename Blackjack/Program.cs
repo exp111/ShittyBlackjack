@@ -43,23 +43,23 @@ namespace Blackjack
             }
         }
 
-        static void printHand(List<Cards> list)
+        static void printHand(List<Cards> list, bool dealer = false)
         {
             int value = 0;
             foreach (Cards card in list)
             {
-                value += (int)card;
+                value += card == Cards.ACE ? dealer ? 11 : 1 : (int)card;
                 Console.Write(card.ToString() + ", ");
             }
             Console.WriteLine("Value: " + value);
         }
 
-        static int getValue(List<Cards> list)
+        static int getValue(List<Cards> list, bool dealer = false)
         {
             int value = 0;
             foreach (Cards card in list)
             {
-                value += (int)card;
+                value += card == Cards.ACE ? dealer ? 11 : 1 : (int)card;
             }
             return value;
         }
@@ -101,7 +101,7 @@ namespace Blackjack
                 //First Dealer
                 drawCard(dealerHand);
                 Console.WriteLine("Dealer: ");
-                printHand(dealerHand);
+                printHand(dealerHand, true);
 
                 //Then player
                 drawCard(hand, 2);
@@ -128,33 +128,35 @@ namespace Blackjack
                     }
                 } while (cardInput != 'n');
 
-                //Draw for dealer
-                while (getValue(dealerHand) < 17)
-                {
-                    drawCard(dealerHand);
-                }
-                Console.WriteLine("Dealer: ");
-                printHand(dealerHand);
-
-                //Did you win? Prolly not looser
                 int handValue = getValue(hand);
-                int dealerValue = getValue(dealerHand);
+                if (handValue <= 21)
+                {
+                    //Draw for dealer
+                    while (getValue(dealerHand) < 17)
+                    {
+                        drawCard(dealerHand);
+                    }
+                    Console.WriteLine("Dealer: ");
+                    printHand(dealerHand);
 
-                if (handValue > 21) //You're out
-                {
-                    Console.WriteLine("You lost :c!");
-                }
-                else if (dealerValue > 21 || handValue > dealerValue) //yay
-                {
-                    Console.WriteLine("You won!");
-                    money += bet * winMultiplier;
-                }
-                else
-                {
-                    if (handValue == dealerValue) //tie
-                        money += bet;
+                    //Did you win? Prolly not looser
+                    int dealerValue = getValue(dealerHand, true);
+
+                    if (dealerValue > 21 || handValue > dealerValue) //yay
+                    {
+                        Console.WriteLine("You won!");
+                        money += bet * winMultiplier;
+                    }
                     else
-                        Console.WriteLine("You lost :c!");
+                    {
+                        if (handValue == dealerValue) //tie
+                        {
+                            Console.WriteLine("Tie...");
+                            money += bet;
+                        }
+                        else
+                            Console.WriteLine("You lost :c!");
+                    }
                 }
 
                 Console.WriteLine("Your Money: " + money);
